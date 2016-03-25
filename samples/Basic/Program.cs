@@ -8,7 +8,7 @@ namespace Basic
         static void Main(string[] args)
         {
             var s = new CodeWriterSettings(CodeWriterSettings.CSharpDefault);
-            s.BlockNewLine = false;
+            s.NewLineBeforeBlockBegin = false;
             s.TranslationMapping["`"] = "\"";
 
             var w = new CodeWriter.CodeWriter(s);

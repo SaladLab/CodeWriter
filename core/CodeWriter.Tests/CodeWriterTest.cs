@@ -5,18 +5,48 @@ namespace CodeWriter.Tests
     public class CodeWriterTest
     {
         [Fact]
-        private void Test_Block_WithNewLine()
+        private void Test_Block_NewLineBeforeBlockBegin_False()
         {
             var w = CreateTestWriter();
-            w.Settings.BlockNewLine = true;
+            w.Settings.NewLineBeforeBlockBegin = false;
 
             using (w.B("Block"))
             {
-                using (w.B("SubBlock1"))
+                using (w.b("SubBlock1"))
                 {
                     w._("Line1");
                 }
-                using (w.B("SubBlock2"))
+                using (w.b("SubBlock2"))
+                {
+                    w._("Line2");
+                }
+            }
+
+            AssertEqualLines(
+                w,
+                "Block {",
+                "  SubBlock1 {",
+                "    Line1",
+                "  }",
+                "  SubBlock2 {",
+                "    Line2",
+                "  }",
+                "}");
+        }
+
+        [Fact]
+        private void Test_Block_NewLineBeforeBlockBegin_True()
+        {
+            var w = CreateTestWriter();
+            w.Settings.NewLineBeforeBlockBegin = true;
+
+            using (w.B("Block"))
+            {
+                using (w.b("SubBlock1"))
+                {
+                    w._("Line1");
+                }
+                using (w.b("SubBlock2"))
                 {
                     w._("Line2");
                 }
@@ -38,10 +68,9 @@ namespace CodeWriter.Tests
         }
 
         [Fact]
-        private void Test_Block_WithoutNewLine()
+        private void Test_Block_NewLineAfterBlockEnd_True()
         {
             var w = CreateTestWriter();
-            w.Settings.BlockNewLine = false;
 
             using (w.B("Block"))
             {
@@ -53,6 +82,11 @@ namespace CodeWriter.Tests
                 {
                     w._("Line2");
                 }
+                w._("Line");
+                using (w.B("SubBlock3"))
+                {
+                    w._("Line3");
+                }
             }
 
             AssertEqualLines(
@@ -61,8 +95,14 @@ namespace CodeWriter.Tests
                 "  SubBlock1 {",
                 "    Line1",
                 "  }",
+                "",
                 "  SubBlock2 {",
                 "    Line2",
+                "  }",
+                "",
+                "  Line",
+                "  SubBlock3 {",
+                "    Line3",
                 "  }",
                 "}");
         }
@@ -117,6 +157,7 @@ namespace CodeWriter.Tests
         {
             var settings = new CodeWriterSettings(CodeWriterSettings.CSharpDefault);
             settings.Indent = "  ";
+            settings.NewLineBeforeBlockBegin = false;
             return new CodeWriter(settings);
         }
     }

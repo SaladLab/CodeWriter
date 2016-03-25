@@ -10,6 +10,7 @@ namespace CodeWriter
         private readonly CodeWriterSettings _settings;
         private readonly StringBuilder _sb;
         private int _indent;
+        private bool _newLineOnBlockEnd;
 
         public CodeWriterSettings Settings => _settings;
         public int Indent => _indent;
@@ -30,6 +31,26 @@ namespace CodeWriter
 
         public void Write(string str = null)
         {
+            if (_newLineOnBlockEnd)
+            {
+                if (str != null)
+                    _sb.Append(_settings.NewLine);
+
+                _newLineOnBlockEnd = false;
+            }
+
+            WriteInternal(str);
+        }
+
+        public void Write(string str, params string[] strs)
+        {
+            Write(str);
+            foreach (var s in strs)
+                Write(s);
+        }
+
+        private void WriteInternal(string str = null)
+        {
             if (str != null)
             {
                 _sb.Append(GetIndentString());
@@ -42,21 +63,21 @@ namespace CodeWriter
             }
         }
 
-        public void Write(params string[] strs)
+        public UsingHandle OpenBlock(string str = null, bool newLineAfterBlockEnd = false)
         {
-            foreach (var str in strs)
-                Write(str);
-        }
+            if (_newLineOnBlockEnd)
+            {
+                _sb.Append(_settings.NewLine);
+                _newLineOnBlockEnd = false;
+            }
 
-        public UsingHandle OpenBlock(string str = null)
-        {
             if (str != null)
             {
                 _sb.Append(GetIndentString());
                 _sb.Append(str);
-                if (_settings.BlockNewLine)
+                if (_settings.NewLineBeforeBlockBegin)
                 {
-                    _sb.Append(_settings.BlockNewLine ? _settings.NewLine: " ");
+                    _sb.Append(_settings.NewLineBeforeBlockBegin ? _settings.NewLine : " ");
                     Write(_settings.BlockBegin);
                 }
                 else
@@ -70,12 +91,14 @@ namespace CodeWriter
             {
                 Write(_settings.BlockBegin);
             }
-            
+
             IncIndent();
             return new UsingHandle(() =>
             {
                 DecIndent();
-                Write("}");
+                WriteInternal(_settings.BlockEnd);
+
+                _newLineOnBlockEnd = newLineAfterBlockEnd;
             });
         }
 
@@ -100,8 +123,8 @@ namespace CodeWriter
         public override string ToString()
         {
             var headComment = HeadLines != null
-                ? string.Join(_settings.NewLine, HeadLines) + _settings.NewLine
-                : "";
+                                  ? string.Join(_settings.NewLine, HeadLines) + _settings.NewLine
+                                  : "";
 
             var text = headComment + _sb.ToString();
             if (_settings.TranslationMapping != null)
