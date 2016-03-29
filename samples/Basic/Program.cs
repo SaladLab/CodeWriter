@@ -17,13 +17,13 @@ namespace Basic
             {
                 using (w.B("public int Sum(int a, int b)"))
                 {
-                    w._($"var r = a + b;",
-                        $"return r;");
+                    w._("var r = a + b;",
+                        "return r;");
                 }
                 using (w.B("public int Mul(int a, int b)"))
                 {
-                    w._($"var r = `a * b`;",
-                        $"return r;");
+                    w._("var r = `a * b`;",
+                        "return r;");
                 }
             }
             w.HeadLines = new[]
