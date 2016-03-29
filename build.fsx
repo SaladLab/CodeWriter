@@ -9,8 +9,8 @@ open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open Fake.RestorePackageHelper
 open Fake.OpenCoverHelper
-open Fake.EnvironmentHelper
 open Fake.ProcessHelper
+open Fake.AppVeyor
 
 // ------------------------------------------------------------------------------ Project
 
@@ -113,7 +113,9 @@ Target "Test" (fun _ ->
         {p with 
             ToolPath = "./packages/FAKE/xunit.runner.console/tools/xunit.console.exe";
             ShadowCopy = false;
-            XmlOutputPath = Some (testDir @@ "test.xml") }))
+            XmlOutputPath = Some (testDir @@ "test.xml") })
+    if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then
+        UploadTestResultsFile Xunit (testDir @@ "test.xml"))
 
 Target "Cover" (fun _ -> 
     ensureDirectory testDir
@@ -130,10 +132,13 @@ Target "Cover" (fun _ ->
                  Filter = "+[*]* -[*.Tests]* -[xunit*]*"})
                  (dlls + " -noshadow"))
     if getBuildParam "coverallskey" <> "" then
+        // disable printing args to keep coverallskey secret
+        ProcessHelper.enableProcessTracing <- false
         let result = ExecProcess (fun info ->
             info.FileName <- "./packages/coveralls.io/tools/coveralls.net.exe"
             info.Arguments <- testDir @@ "coverage.xml" + " -r " + (getBuildParam "coverallskey")) TimeSpan.MaxValue
-        if result <> 0 then failwithf "Failed to upload coverage data to coveralls.io")
+        if result <> 0 then failwithf "Failed to upload coverage data to coveralls.io"
+        ProcessHelper.enableProcessTracing <- true)
 
 let createNugetPackages _ =
     projects

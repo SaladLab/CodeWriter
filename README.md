@@ -1,7 +1,8 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/r1ofr28tpxqb30f9?svg=true)](https://ci.appveyor.com/project/veblush/codewriter)
-[![NuGet Status](http://img.shields.io/nuget/v/CodeWriter.svg?style=flat)](https://www.nuget.org/packages/CodeWriter/)
-
 # CodeWriter
+
+[![NuGet Status](http://img.shields.io/nuget/v/CodeWriter.svg?style=flat)](https://www.nuget.org/packages/CodeWriter/)
+[![Build status](https://ci.appveyor.com/api/projects/status/r1ofr28tpxqb30f9?svg=true)](https://ci.appveyor.com/project/veblush/codewriter)
+[![Coverage Status](https://coveralls.io/repos/github/SaladLab/CodeWriter/badge.svg?branch=master)](https://coveralls.io/github/SaladLab/CodeWriter?branch=master)
 
 CodeWriter is a small helper class for generating code concisely. It helps writing
 neat code which generates code dynamically.
