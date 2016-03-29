@@ -2,10 +2,15 @@
 #r "FakeLib.dll"
 
 open Fake
+open System
 open System.IO
 open Fake.Testing.XUnit2
 open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
+open Fake.RestorePackageHelper
+open Fake.OpenCoverHelper
+open Fake.EnvironmentHelper
+open Fake.ProcessHelper
 
 // ------------------------------------------------------------------------------ Project
 
@@ -85,22 +90,50 @@ Target "AssemblyInfo" (fun _ ->
         )
 )
 
+Target "RestorePackages" (fun _ -> 
+     buildSolutionFile
+     |> RestoreMSSolutionPackages (fun p ->
+         { p with
+             OutputPath = "./packages"
+             Retries = 4 })
+ )
+
 Target "Build" (fun _ ->
     !! buildSolutionFile
     |> MSBuild "" "Rebuild" [ "Configuration", buildConfiguration ]
     |> Log "Build-Output: "
 )
 
-Target "Test" (fun _ ->  
-    let xunitToolPath = findToolInSubPath "xunit.console.exe" "./packages/FAKE/xunit.runner.console*/tools"
+Target "Test" (fun _ -> 
     ensureDirectory testDir
-    !! ("./core/**/bin/" + buildConfiguration + "/*.Tests.dll")
+    projects
+    |> List.map (fun project -> (project.Folder + ".Tests") @@ "bin" @@ buildConfiguration @@ (project.Name + ".Tests.dll"))
+    |> List.filter (fun path -> File.Exists(path))
     |> xUnit2 (fun p -> 
         {p with 
-            ToolPath = xunitToolPath;
+            ToolPath = "./packages/FAKE/xunit.runner.console/tools/xunit.console.exe";
             ShadowCopy = false;
-            XmlOutputPath = Some (testDir @@ "TestResult.xml") })
-)
+            XmlOutputPath = Some (testDir @@ "test.xml") }))
+
+Target "Cover" (fun _ -> 
+    ensureDirectory testDir
+    projects
+    |> List.map (fun project -> (project.Folder + ".Tests") @@ "bin" @@ buildConfiguration @@ (project.Name + ".Tests.dll"))
+    |> List.filter (fun path -> File.Exists(path))
+    |> String.concat " "
+    |> (fun dlls ->
+    OpenCover (fun p -> 
+        { p with ExePath = "./packages/OpenCover/tools/OpenCover.Console.exe"
+                 TestRunnerExePath = "./packages/FAKE/xunit.runner.console/tools/xunit.console.exe"
+                 Output = testDir @@ "coverage.xml"
+                 Register = RegisterUser
+                 Filter = "+[*]* -[*.Tests]* -[xunit*]*"})
+                 (dlls + " -noshadow"))
+    if getBuildParam "coverallskey" <> "" then
+        let result = ExecProcess (fun info ->
+            info.FileName <- "./packages/coveralls.io/tools/coveralls.net.exe"
+            info.Arguments <- testDir @@ "coverage.xml" + " -r " + (getBuildParam "coverallskey")) TimeSpan.MaxValue
+        if result <> 0 then failwithf "Failed to upload coverage data to coveralls.io")
 
 let createNugetPackages _ =
     projects
@@ -179,6 +212,9 @@ Target "CreateNuget" <| fun _ ->
 Target "PublishNuget" <| fun _ ->
     publishNugetPackages()
 
+Target "CI" <| fun _ ->
+    ()
+
 Target "Help" (fun _ ->  
     List.iter printfn [
       "usage:"
@@ -192,21 +228,24 @@ Target "Help" (fun _ ->
       "                [nugetprerelease={VERSION_PRERELEASE}] "
       " * PublishNuget Publish nugets packages"
       "                [nugetkey={API_KEY}] [nugetpublishurl={PUBLISH_URL}] [forcepublish=1]"
+      " * CI           Build, Test and Nuget for CI"
       ""]
 )
 
 // --------------------------------------------------------------------------- Dependency
 
-// Build order
 "Clean"
   ==> "AssemblyInfo"
+  ==> "RestorePackages"
   ==> "Build"
   ==> "Test"
 
-"Build"
-  ==> "Nuget"
+"Build" ==> "Nuget"
+"Build" ==> "CreateNuget"
+"Build" ==> "Cover"
 
-"Build"
-  ==> "CreateNuget"
-  
+"Test" ==> "CI"
+"Cover" ==> "CI"
+"Nuget" ==> "CI"
+
 RunTargetOrDefault "Help"

@@ -1,13 +1,9 @@
 version: 0.2.2.{build}
 os: Visual Studio 2015
-configuration: Debug
-before_build:
-- cmd: nuget restore
-build:
-  project: CodeWriter.sln
-  verbosity: minimal
 environment:
   NUGETKEY:
     secure: z2fJQckgBQJ7IKfjOyrZYPM2+xDj4xYuqaUDBG7MrJs+b1bNc0vzYMTxpF6Sb1mA
-deploy_script:
-- cmd: build.cmd nuget nugetkey=%NUGETKEY% nugetpublishurl=https://www.myget.org/F/saladlab/api/v2/package nugetprerelease=%APPVEYOR_BUILD_NUMBER%
+  COVERALLSKEY:
+    secure: ycQAJujAMeDgKl+HbS+Z8NntT3pC2/N+eyR9ZaKcF8YOQm95WWOl47iW2eW0Gz56
+build_script:
+- cmd: build.cmd ci nugetkey=%NUGETKEY% nugetpublishurl=https://www.myget.org/F/saladlab/api/v2/package nugetprerelease=%APPVEYOR_BUILD_NUMBER% coverallskey=%COVERALLSKEY%
