@@ -2,7 +2,7 @@
 
 namespace CodeWriter
 {
-    public class UsingHandle : IDisposable
+    public sealed class UsingHandle : IDisposable
     {
         private Action _disposed;
 
