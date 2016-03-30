@@ -27,14 +27,14 @@ namespace CodeWriter
 
         /// <summary>
         /// NewLine is inserted with new block.
-        /// 
+        ///
         /// BlockNewLine: true
         /// <code>
         /// Block
         /// {
         /// }
         /// </code>
-        /// 
+        ///
         /// BlockNewLine: false
         /// <code>
         /// Block {

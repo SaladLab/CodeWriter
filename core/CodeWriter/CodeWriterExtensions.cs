@@ -2,6 +2,7 @@
 {
     public static class CodeWriterExtensions
     {
+#pragma warning disable SA1300 // Element must begin with upper-case letter
         public static void _(this CodeWriter w, string str = null)
         {
             w.Write(str);
@@ -21,5 +22,6 @@
         {
             return w.OpenBlock(str, newLineAfterBlockEnd: true);
         }
+#pragma warning restore SA1300 // Element must begin with upper-case letter
     }
 }
