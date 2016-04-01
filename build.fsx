@@ -50,7 +50,7 @@ Target "Help" <| fun _ ->
 "Build" ==> "Nuget"
 "Build" ==> "CreateNuget"
 "Build" ==> "Cover"
-"Build" ==> "Coverity"
+"Restore" ==> "Coverity"
 
 "Test" ==> "CI"
 "Cover" ==> "CI"

@@ -26,6 +26,10 @@ IF NOT EXIST %PACKAGEPATH%coveralls.io (
   %NUGET% install coveralls.io -Version 1.3.4 %NUGETOPTIONS%
 )
 
+IF NOT EXIST %PACKAGEPATH%PublishCoverity (
+  %NUGET% install PublishCoverity -Version 0.11.0 %NUGETOPTIONS%
+)
+
 set encoding=utf-8
 packages\_\FAKE\tools\FAKE.exe build.fsx %*
 
