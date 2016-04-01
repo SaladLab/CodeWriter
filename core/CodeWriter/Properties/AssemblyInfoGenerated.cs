@@ -7,5 +7,6 @@ using System.Reflection;
 namespace System {
     internal static class AssemblyVersionInformation {
         internal const string Version = "0.2.1";
+        internal const string InformationalVersion = "0.2.1";
     }
 }

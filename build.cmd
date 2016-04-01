@@ -2,13 +2,31 @@
 
 pushd %~dp0
 
-tools\nuget\NuGet.exe update -self
-tools\nuget\NuGet.exe install FAKE -ConfigFile tools\nuget\Nuget.Config -OutputDirectory packages -ExcludeVersion -Version 4.22.6
-tools\nuget\NuGet.exe install xunit.runner.console -ConfigFile tools\nuget\Nuget.Config -OutputDirectory packages\FAKE -ExcludeVersion -Version 2.1.0
-tools\nuget\NuGet.exe install OpenCover -ConfigFile tools\nuget\Nuget.Config -OutputDirectory packages -ExcludeVersion -Version 4.6.519
-tools\nuget\NuGet.exe install coveralls.io -ConfigFile tools\nuget\Nuget.Config -OutputDirectory packages -ExcludeVersion -Version 1.3.4
+SET PACKAGEPATH=.\packages\_\
+SET NUGET=.\tools\nuget\NuGet.exe
+SET NUGETOPTIONS=-ConfigFile .\tools\nuget\NuGet.Config -OutputDirectory %PACKAGEPATH% -ExcludeVersion
+
+IF NOT EXIST %PACKAGEPATH%FAKE (
+  %NUGET% install FAKE -Version 4.23.0 %NUGETOPTIONS%
+)
+
+IF NOT EXIST %PACKAGEPATH%FAKE.BuildLib (
+  %NUGET% install FAKE.BuildLib -Version 0.1.0 %NUGETOPTIONS%
+)
+
+IF NOT EXIST %PACKAGEPATH%xunit.runner.console (
+  %NUGET% install xunit.runner.console -Version 2.1.0 %NUGETOPTIONS%
+)
+
+IF NOT EXIST %PACKAGEPATH%OpenCover (
+  %NUGET% install OpenCover -Version 4.6.519 %NUGETOPTIONS%
+)
+
+IF NOT EXIST %PACKAGEPATH%coveralls.io (
+  %NUGET% install coveralls.io -Version 1.3.4 %NUGETOPTIONS%
+)
 
 set encoding=utf-8
-packages\FAKE\tools\FAKE.exe build.fsx %*
+packages\_\FAKE\tools\FAKE.exe build.fsx %*
 
 popd
