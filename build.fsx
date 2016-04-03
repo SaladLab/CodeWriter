@@ -1,5 +1,5 @@
-﻿#I @"packages/_/FAKE/tools"
-#I @"packages/_/FAKE.BuildLib/lib/net451"
+﻿#I @"packages/FAKE/tools"
+#I @"packages/FAKE.BuildLib/lib/net451"
 #r "FakeLib.dll"
 #r "BuildLib.dll"
 
