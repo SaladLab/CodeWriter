@@ -1,9 +1,28 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using Xunit;
 
 namespace CodeWriter.Tests
 {
     public class CodeWriterTest
     {
+        [Fact]
+        private void Test_Block_MultipleStrings()
+        {
+            var w = CreateTestWriter();
+            w.Settings.NewLineBeforeBlockBegin = false;
+
+            using (w.B("Block",
+                       "Description"))
+            {
+            }
+
+            AssertEqualLines(
+                w,
+                "Block",
+                "  Description {",
+                "}");
+        }
+
         [Fact]
         private void Test_Block_NewLineBeforeBlockBegin_False()
         {
@@ -108,11 +127,46 @@ namespace CodeWriter.Tests
         }
 
         [Fact]
+        private void Test_Indent_WithStartAndEnd()
+        {
+            var w = CreateTestWriter();
+
+            using (w.I("Block {", "};"))
+            {
+                using (w.i("<", ">"))
+                {
+                    w._("Line1");
+                }
+                using (w.i("<", ">"))
+                {
+                    w._("Line2");
+                }
+            }
+            using (w.I("Clock [", "];"))
+            {
+            }
+
+            AssertEqualLines(
+                w,
+                "Block {",
+                "  <",
+                "    Line1",
+                "  >",
+                "  <",
+                "    Line2",
+                "  >",
+                "};",
+                "",
+                "Clock [",
+                "];");
+        }
+
+        [Fact]
         private void Test_HeadLines()
         {
             var w = CreateTestWriter();
 
-            w.HeadLines = new[]
+            w.HeadLines = new List<string>
             {
                 "HeadLine1",
                 "HeadLine2",
@@ -133,7 +187,7 @@ namespace CodeWriter.Tests
             w.Settings.TranslationMapping["`"] = "\"";
             w.Settings.TranslationMapping["'"] = "*";
 
-            w.HeadLines = new[]
+            w.HeadLines = new List<string>
             {
                 "Head`Line1`",
                 "Head'Line2'",

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CodeWriter;
 
 namespace Basic
@@ -27,7 +28,7 @@ namespace Basic
                         "return r;");
                 }
             }
-            w.HeadLines = new[]
+            w.HeadLines = new List<string>
             {
                 "// COMMENT1",
                 "// COMMENT2",

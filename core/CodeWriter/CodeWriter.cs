@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace CodeWriter
 
         public CodeWriterSettings Settings => _settings;
         public int Indent => _indent;
-        public string[] HeadLines { get; set; }
+        public List<string> HeadLines { get; set; }
 
         public CodeWriter(CodeWriterSettings settings)
         {
@@ -63,7 +64,7 @@ namespace CodeWriter
             }
         }
 
-        public UsingHandle OpenBlock(string str = null, bool newLineAfterBlockEnd = false)
+        public UsingHandle OpenBlock(string[] strs, bool newLineAfterBlockEnd = false)
         {
             if (_newLineOnBlockEnd)
             {
@@ -71,10 +72,16 @@ namespace CodeWriter
                 _newLineOnBlockEnd = false;
             }
 
-            if (str != null)
+            if (strs.Any())
             {
-                _sb.Append(GetIndentString());
-                _sb.Append(str);
+                for (var i = 0; i < strs.Length; i++)
+                {
+                    _sb.Append(GetIndentString(i == 0 ? 0 : 1));
+                    _sb.Append(strs[i]);
+                    if (i < strs.Length - 1)
+                        _sb.Append(_settings.NewLine);
+                }
+
                 if (_settings.NewLineBeforeBlockBegin)
                 {
                     _sb.Append(_settings.NewLineBeforeBlockBegin ? _settings.NewLine : " ");
@@ -97,6 +104,32 @@ namespace CodeWriter
             {
                 DecIndent();
                 WriteInternal(_settings.BlockEnd);
+
+                _newLineOnBlockEnd = newLineAfterBlockEnd;
+            });
+        }
+
+        public UsingHandle OpenIndent(string begin, string end, bool newLineAfterBlockEnd = false)
+        {
+            if (_newLineOnBlockEnd)
+            {
+                _sb.Append(_settings.NewLine);
+                _newLineOnBlockEnd = false;
+            }
+
+            if (begin != null)
+            {
+                _sb.Append(GetIndentString());
+                _sb.Append(begin);
+                _sb.Append(_settings.NewLine);
+            }
+
+            IncIndent();
+            return new UsingHandle(() =>
+            {
+                DecIndent();
+                if (end != null)
+                    WriteInternal(end);
 
                 _newLineOnBlockEnd = newLineAfterBlockEnd;
             });

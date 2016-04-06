@@ -1,8 +1,9 @@
-﻿namespace CodeWriter
+﻿#pragma warning disable SA1300 // Element must begin with upper-case letter
+
+namespace CodeWriter
 {
     public static class CodeWriterExtensions
     {
-#pragma warning disable SA1300 // Element must begin with upper-case letter
         public static void _(this CodeWriter w, string str = null)
         {
             w.Write(str);
@@ -13,15 +14,24 @@
             w.Write(str, strs);
         }
 
-        public static UsingHandle b(this CodeWriter w, string str = null)
+        public static UsingHandle b(this CodeWriter w, params string[] strs)
         {
-            return w.OpenBlock(str, newLineAfterBlockEnd: false);
+            return w.OpenBlock(strs, newLineAfterBlockEnd: false);
         }
 
-        public static UsingHandle B(this CodeWriter w, string str = null)
+        public static UsingHandle B(this CodeWriter w, params string[] strs)
         {
-            return w.OpenBlock(str, newLineAfterBlockEnd: true);
+            return w.OpenBlock(strs, newLineAfterBlockEnd: true);
         }
-#pragma warning restore SA1300 // Element must begin with upper-case letter
+
+        public static UsingHandle i(this CodeWriter w, string begin = null, string end = null)
+        {
+            return w.OpenIndent(begin, end, newLineAfterBlockEnd: false);
+        }
+
+        public static UsingHandle I(this CodeWriter w, string begin = null, string end = null)
+        {
+            return w.OpenIndent(begin, end, newLineAfterBlockEnd: true);
+        }
     }
 }
